@@ -1,7 +1,12 @@
-
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+</head>
+<body>
+<h1>Bonsai Life Support</h1>
+<h2>Status:</h2>
 <?php
-echo "<h1>";
-echo "Level: ";
+echo "Tank Level: ";
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 include "php_serial.class.php";
@@ -18,7 +23,7 @@ echo $data;
 echo " %";
 echo "</br>";
 
-echo "Moisture: ";
+echo "Soil Moisture: ";
 $serial->sendMessage("M");
 $data = $serial->readPort();
 echo $data;
@@ -32,15 +37,15 @@ $serial->sendMessage("W");
 $serial->deviceClose();
 echo "Plant Watered!</br>";
 }
-echo "</h1>";
 ?>
-<html>
-<head>
-</head>
 <body>
+<h2>Controls:</h2>
+</br>
 <form action "index.php" method="get">
 	<input type="hidden" name="waterPlant" value="run">
-	<input type="submit" value="Water Plant">
+	<div style="text-align: center">
+		<input type="submit" value="Water" style="font-size: 120%; width: 40%; height: 20%">
+	</div>
 </form>
 </body>
 </html>
