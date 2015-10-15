@@ -7,6 +7,8 @@ class LevelSensor
   int lowRaw;
   int highRaw;
   
+  int lastLevelPercentage;
+  
   public:
   
   LevelSensor(int tPin, int ePin, int miRaw, int maRaw)
@@ -35,12 +37,18 @@ class LevelSensor
   }
   int readLevelPercentage()
   {
-    int level = this->readLevelRaw();   
+    int level = this->readLevelRaw();
+    //Serial.println(level);
     int range = lowRaw - highRaw;
     int levelPercentage = (int)((100.0/(float)range)*(level-highRaw));
-    return 100 - levelPercentage;
+    lastLevelPercentage = 100 - levelPercentage;
+    return lastLevelPercentage;
   }
   
+  int getLastLevelPercentage()
+  {
+    return lastLevelPercentage;
+  }
 };
 
 
@@ -97,20 +105,40 @@ class WaterPump
     pinMode(pin, OUTPUT);
   }
   
-  void waterMillis(int msec)
-  {    
-    //should update function and remove delay, use hardware time instead
+  void water(int lastLevelPercentage)
+  {       
+    //calculate watertime based on tank level
+    int watertime;
+    if(lastLevelPercentage >= 100){
+      watertime = 1400;
+    }
+    else if(lastLevelPercentage >= 80){
+      watertime = 1500;
+    }
+    else if(lastLevelPercentage >= 60){
+      watertime = 1600;
+    }
+    else if(lastLevelPercentage >= 40){
+      watertime = 1700;
+    }
+    else if(lastLevelPercentage >= 20){
+      watertime = 1800;
+    }
+    else{
+      watertime = 1800;
+    }
+    
+    //Serial.println(watertime);
     digitalWrite(pumpPin, HIGH);
-    delay(msec);
+    delay(watertime);
     digitalWrite(pumpPin, LOW);
   }
-  
 };
 
 
 int command = 0;
 
-LevelSensor LevSens(5, 6, 14, 3);
+LevelSensor LevSens(5, 6, 14, 2);
 MoistureSensor MoistSens(0);
 RaspberryPiInterface RpiInterface(9600);
 WaterPump Pump(10);
@@ -138,7 +166,7 @@ void loop()
        
        case 'W':
        //water plant and report
-       Pump.waterMillis(500);
+       Pump.water(LevSens.getLastLevelPercentage());
        break;
      }
    }
